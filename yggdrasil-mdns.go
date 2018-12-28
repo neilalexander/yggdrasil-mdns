@@ -14,12 +14,12 @@ import "os"
 import "github.com/neilalexander/zeroconf"
 
 type service struct {
-	instance  string
-	name      string
-	domain    string
-	hostname  string
-	port      int
-	address   string
+	instance string
+	name     string
+	domain   string
+	hostname string
+	port     int
+	address  string
 }
 
 var servers []*zeroconf.Server
@@ -45,25 +45,25 @@ func main() {
 		os.Exit(1)
 	}
 
-  /*
-	var loopback net.Interface
-	if intfs, err := net.Interfaces(); err == nil {
-		for _, intf := range intfs {
-			if intf.Flags&net.FlagLoopback != 0 {
-				loopback = intf
-				fmt.Println("Found loopback interface", loopback.Name)
-				break
+	/*
+		var loopback net.Interface
+		if intfs, err := net.Interfaces(); err == nil {
+			for _, intf := range intfs {
+				if intf.Flags&net.FlagLoopback != 0 {
+					loopback = intf
+					fmt.Println("Found loopback interface", loopback.Name)
+					break
+				}
 			}
+		} else {
+			panic(err)
 		}
-	} else {
-		panic(err)
-	}
 
-	if loopback.Name == "" {
-		fmt.Println("No loopback interface found")
-		os.Exit(1)
-	}
-  */
+		if loopback.Name == "" {
+			fmt.Println("No loopback interface found")
+			os.Exit(1)
+		}
+	*/
 
 	for key, value := range nodeinfos["yggnodeinfo"].(map[string]interface{}) {
 		if services, ok := value.(map[string]interface{})["services"]; ok {
@@ -78,25 +78,25 @@ func main() {
 						port:     int(nodesvc[2].(float64)),
 					}
 
-          if len(nodesvc) >= 4 {
-            if targetip, ok := nodesvc[3].(string); ok {
-  						origin := net.ParseIP(key)
-  						target := net.ParseIP(targetip)
-  						if target[0] == 0x03 {
-  							if bytes.Compare(origin[1:8], target[1:8]) == 0 {
-  								s.address = target.String()
-  							}
-  						} else if target[0] == 0x02 {
-  							if bytes.Compare(origin[:16], target[:16]) == 0 {
-  								s.address = origin.String()
-  							}
-  						}
-            }
+					if len(nodesvc) >= 4 {
+						if targetip, ok := nodesvc[3].(string); ok {
+							origin := net.ParseIP(key)
+							target := net.ParseIP(targetip)
+							if target[0] == 0x03 {
+								if bytes.Compare(origin[1:8], target[1:8]) == 0 {
+									s.address = target.String()
+								}
+							} else if target[0] == 0x02 {
+								if bytes.Compare(origin[:16], target[:16]) == 0 {
+									s.address = origin.String()
+								}
+							}
+						}
 					} else {
-            s.address = key
-          }
+						s.address = key
+					}
 
-          s.hostname = "yggdrasil-" + strings.Replace(s.address, ":", "", -1)
+					s.hostname = "yggdrasil-" + strings.Replace(s.address, ":", "", -1)
 
 					if server, err := zeroconf.RegisterProxy(
 						s.instance,
